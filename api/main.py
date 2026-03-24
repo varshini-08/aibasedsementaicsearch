@@ -2,10 +2,14 @@ import contextlib
 from fastapi import FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from query_analyzer import preprocess_text
-# The SearchEngine is imported but will be initialized lazily or via lifespan
-from search_engine import SearchEngine
-from ranking import hybrid_ranking
+try:
+    from .query_analyzer import preprocess_text
+    from .search_engine import SearchEngine
+    from .ranking import hybrid_ranking
+except ImportError:
+    from query_analyzer import preprocess_text
+    from search_engine import SearchEngine
+    from ranking import hybrid_ranking
 
 class SearchRequest(BaseModel):
     query: str
