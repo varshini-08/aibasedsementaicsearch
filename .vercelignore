@@ -1,0 +1,8 @@
+# Ignore backend and data from Vercel build
+backend/
+dataset/
+vector_store/
+.venv/
+*.py
+*.db
+*.log
