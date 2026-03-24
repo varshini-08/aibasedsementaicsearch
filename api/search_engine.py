@@ -7,8 +7,8 @@ from embeddings import Embedder
 class SearchEngine:
     def __init__(self, csv_path=None):
         if csv_path is None:
-            # Get the directory of the current file (backend/) and go up one level
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            # Get the directory of the current file (api/)
+            base_dir = os.path.dirname(os.path.abspath(__file__))
             csv_path = os.path.join(base_dir, 'dataset', 'tamil_nadu_places.csv')
         self.csv_path = csv_path
         self.df = pd.read_csv(csv_path)

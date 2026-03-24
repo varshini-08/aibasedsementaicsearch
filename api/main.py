@@ -57,7 +57,7 @@ async def perform_search(request: Request, query: str):
     
     return final_results
 
-@app.post("/search")
+@app.post("/api/search")
 async def search_post(request: Request, search_req: SearchRequest):
     """
     Dynamic POST search endpoint.
@@ -65,7 +65,7 @@ async def search_post(request: Request, search_req: SearchRequest):
     results = await perform_search(request, search_req.query)
     return results
 
-@app.get("/search")
+@app.get("/api/search")
 async def search_get(request: Request, q: str = Query(..., min_length=1)):
     """
     Legacy GET endpoint for compatibility.
@@ -77,7 +77,7 @@ async def search_get(request: Request, q: str = Query(..., min_length=1)):
         "count": len(results)
     }
 
-@app.get("/health")
+@app.get("/api/health")
 async def health():
     return {"status": "ok"}
 
