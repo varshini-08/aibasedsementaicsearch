@@ -1,8 +1,14 @@
 {
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "destination": "/frontend/$1"
-    }
+  "version": 2,
+  "public": false,
+  "cleanUrls": true,
+  "framework": "vite",
+  "buildCommand": "npm --prefix frontend install && npm --prefix frontend run build",
+  "outputDirectory": "frontend/dist",
+  "ignore": [
+    "backend/**",
+    "dataset/**",
+    "vector_store/**",
+    ".venv/**"
   ]
 }
