@@ -2,7 +2,7 @@ import pandas as pd
 import sqlite3
 import numpy as np
 import os
-from embeddings import Embedder
+from .embeddings import Embedder
 
 class SearchEngine:
     def __init__(self, csv_path=None):
