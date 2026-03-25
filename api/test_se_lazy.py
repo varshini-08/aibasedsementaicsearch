@@ -1,4 +1,4 @@
-from search_engine import SearchEngine
+from .search_engine import SearchEngine
 import time
 
 print("Initializing SearchEngine (should be fast now)...")

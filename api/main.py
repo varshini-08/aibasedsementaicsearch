@@ -11,9 +11,10 @@ class SearchRequest(BaseModel):
 
 @contextlib.asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Initialize app state placeholder
-    app.state.search_engine = None
-    print("FastAPI app started. SearchEngine will load on first request.")
+    # Initialize SearchEngine on startup
+    print("FastAPI app starting. Initializing SearchEngine...")
+    app.state.search_engine = SearchEngine()
+    print("SearchEngine ready.")
     yield
     print("Shutting down...")
 
@@ -32,11 +33,6 @@ app.add_middleware(
 )
 
 async def perform_search(request: Request, query: str):
-    if request.app.state.search_engine is None:
-        print("Lazy loading SearchEngine...")
-        request.app.state.search_engine = SearchEngine()
-        print("SearchEngine loaded.")
-        
     search_engine_instance = request.app.state.search_engine
     
     # 1. Preprocess for keyword search (sanitization)

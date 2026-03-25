@@ -7,22 +7,42 @@ from .embeddings import Embedder
 class SearchEngine:
     def __init__(self, csv_path=None):
         if csv_path is None:
-            # Get the directory of the current file (api/)
-            base_dir = os.path.dirname(os.path.abspath(__file__))
-            csv_path = os.path.join(base_dir, 'dataset', 'tamil_nadu_places.csv')
+            # Get the directory: d:\aluminiproject\api\dataset
+            api_dir = os.path.dirname(os.path.abspath(__file__))
+            csv_path = os.path.join(api_dir, 'dataset', 'tamil_nadu_places.csv')
         self.csv_path = csv_path
+        self.api_dir = os.path.dirname(os.path.abspath(csv_path)) # Actually api/dataset
+        self.api_root = os.path.dirname(self.api_dir) # api/
+        
         self.df = pd.read_csv(csv_path)
         self.index = None
-        self.db_path = 'search_cache.db'
+        self.db_path = os.path.join(self.api_root, 'search_cache.db')
+        self.vector_store_dir = os.path.join(self.api_root, 'vector_store')
+        self.faiss_index_path = os.path.join(self.vector_store_dir, 'index.faiss')
+        
+        # Ensure vector store directory exists
+        os.makedirs(self.vector_store_dir, exist_ok=True)
+        
         self.embedder = Embedder()
         self._initialize_faiss()
         self._initialize_fts5()
 
     def _initialize_faiss(self):
         """
-        Create and populate FAISS index using place_name + description + keywords + category.
+        Load FAISS index from disk or create it if it doesn't exist.
         """
         import faiss
+        
+        if os.path.exists(self.faiss_index_path):
+            print(f"Loading FAISS index from {self.faiss_index_path}...")
+            try:
+                self.index = faiss.read_index(self.faiss_index_path)
+                print(f"FAISS index loaded with {self.index.ntotal} entries.")
+                return
+            except Exception as e:
+                print(f"Error loading FAISS index: {e}. Rebuilding...")
+
+        print("Building FAISS index from scratch...")
         # Combine name, description, keywords and category for embedding as requested
         texts = self.df.apply(
             lambda row: f"{row['place_name']} {row['description']} {row['keywords']} {row['category']}", 
@@ -34,15 +54,34 @@ class SearchEngine:
         self.index = faiss.IndexFlatL2(dimension)
         # Ensure it's float32 for FAISS
         self.index.add(np.array(embeddings).astype('float32'))
-        print(f"FAISS index initialized with {len(texts)} entries.")
+        
+        # Save index
+        faiss.write_index(self.index, self.faiss_index_path)
+        print(f"FAISS index initialized and saved to {self.faiss_index_path}.")
 
     def _initialize_fts5(self):
         """
-        Create and populate SQLite FTS5 table for keyword search.
+        Initialize SQLite FTS5 table only if it's missing or empty.
         """
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
+        # Check if table exists and has data
+        table_exists = False
+        try:
+            cursor.execute("SELECT count(*) FROM places_fts")
+            count = cursor.fetchone()[0]
+            if count == len(self.df):
+                table_exists = True
+        except sqlite3.OperationalError:
+            pass
+
+        if table_exists:
+            print("FTS5 table already exists and is up to date.")
+            conn.close()
+            return
+
+        print("Populating FTS5 table...")
         # Drop if exists and create FTS5 table
         cursor.execute("DROP TABLE IF EXISTS places_fts")
         cursor.execute("""

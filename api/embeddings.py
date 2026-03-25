@@ -10,11 +10,11 @@ class Embedder:
     
     def _ensure_model(self):
         if self.model is None:
-            print(f"Loading model: {self.model_name}...")
+            print(f"Loading SentenceTransformer model: {self.model_name} (this may take a few seconds on first run)...")
             # Lazy import to avoid import-time hanging
             from sentence_transformers import SentenceTransformer
             self.model = SentenceTransformer(self.model_name)
-            print("Model loaded successfully.")
+            print(f"Model {self.model_name} loaded successfully.")
 
     def get_embedding(self, text):
         """
