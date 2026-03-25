@@ -13,8 +13,14 @@ class SearchRequest(BaseModel):
 async def lifespan(app: FastAPI):
     # Initialize SearchEngine on startup
     print("FastAPI app starting. Initializing SearchEngine...")
-    app.state.search_engine = SearchEngine()
-    print("SearchEngine ready.")
+    try:
+        app.state.search_engine = SearchEngine()
+        print("SearchEngine ready.")
+    except Exception as e:
+        print(f"ERROR initializing SearchEngine: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
     yield
     print("Shutting down...")
 

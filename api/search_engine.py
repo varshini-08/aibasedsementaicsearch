@@ -11,14 +11,22 @@ class SearchEngine:
             api_dir = os.path.dirname(os.path.abspath(__file__))
             csv_path = os.path.join(api_dir, 'dataset', 'tamil_nadu_places.csv')
         self.csv_path = csv_path
+        print(f"CSV path: {self.csv_path}")
+        print(f"CSV exists: {os.path.exists(self.csv_path)}")
         self.api_dir = os.path.dirname(os.path.abspath(csv_path)) # Actually api/dataset
         self.api_root = os.path.dirname(self.api_dir) # api/
+        print(f"API root: {self.api_root}")
         
         self.df = pd.read_csv(csv_path)
+        print(f"Loaded {len(self.df)} rows from CSV")
         self.index = None
         self.db_path = os.path.join(self.api_root, 'search_cache.db')
         self.vector_store_dir = os.path.join(self.api_root, 'vector_store')
         self.faiss_index_path = os.path.join(self.vector_store_dir, 'index.faiss')
+        print(f"DB path: {self.db_path}")
+        print(f"FAISS path: {self.faiss_index_path}")
+        print(f"DB exists: {os.path.exists(self.db_path)}")
+        print(f"FAISS exists: {os.path.exists(self.faiss_index_path)}")
         
         # Ensure vector store directory exists
         os.makedirs(self.vector_store_dir, exist_ok=True)
