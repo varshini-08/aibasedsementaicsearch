@@ -19,11 +19,10 @@ dist-ssr
 *.local
 
 # Project Specific
-search_cache.db
 ranking_results.txt
 output.log
 *.db
-vector_store/
+!search_cache.db
 
 # IDE
 .vscode/
