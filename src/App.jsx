@@ -13,6 +13,24 @@ function App() {
   const [error, setError] = useState(null);
   const [initialState, setInitialState] = useState(true);
   const [showVideo, setShowVideo] = useState(false);
+  const [backendReady, setBackendReady] = useState(false);
+  const [wakingUp, setWakingUp] = useState(true);
+
+  // Ping backend on load to wake Render free tier from sleep
+  useEffect(() => {
+    const warmUp = async () => {
+      try {
+        await api.health();
+        setBackendReady(true);
+      } catch (e) {
+        // If health check fails, still allow search (backend might just be slow)
+        setBackendReady(true);
+      } finally {
+        setWakingUp(false);
+      }
+    };
+    warmUp();
+  }, []);
 
   const handleSearch = async (query) => {
     setIsLoading(true);
@@ -41,6 +59,14 @@ function App() {
       </button>
 
       <VideoExplainer isOpen={showVideo} onClose={() => setShowVideo(false)} />
+
+      {/* Backend warm-up notice */}
+      {wakingUp && (
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl bg-indigo-900/80 border border-indigo-500/30 text-indigo-300 text-xs font-mono tracking-widest uppercase backdrop-blur-sm">
+          ⚡ Waking up backend...
+        </div>
+      )}
+
       {/* Hero Section */}
       <motion.header 
         layout
